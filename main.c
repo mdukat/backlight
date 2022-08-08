@@ -4,6 +4,35 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
+
+bool helpTriggered = false;
+
+#ifdef NOTIFY
+
+#include <libnotify/notify.h>
+
+void notify(int percent){
+	int pid = fork();
+
+	if(pid == 0){
+		// Execute as user who called, since binary is in root ownership
+		uid_t uid = getuid();
+		gid_t gid = getgid();
+		seteuid(uid);
+		setegid(gid);
+
+		notify_init("backlight");
+		char buf[10];
+		sprintf(buf, "%d%%", percent);
+		NotifyNotification* n = notify_notification_new("backlight",buf,NULL);
+		notify_notification_set_timeout(n, 500);
+		notify_notification_show(n, NULL);
+		exit(0);
+	}
+}
+
+#endif
 
 int getMaxBrightness(){
 	// This function is unsafe
@@ -54,6 +83,7 @@ void changeBrightness(int percent){
 }
 
 void printHelp(char* progName){
+	helpTriggered = true;
 	printf("Usage: %s [+-] or <value>\nWhere <value> is in percent\n", progName);
 }
 
@@ -73,6 +103,11 @@ int main(int argc, char** argv){
 		setBrightness(transformToIntel(atoi(argv[1])));
 	else
 		printHelp(argv[0]);
+
+#ifdef NOTIFY
+	if(!helpTriggered)
+		notify( transformToPercent( getCurrentBrightness() ) );
+#endif
 
 	return 0;
 }

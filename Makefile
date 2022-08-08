@@ -1,6 +1,8 @@
-VERSION=1.0
+VERSION=1.1
 REVISION=1
 
+NOTIFY=YES
+FLAGS=
 OUT=backlight
 SOURCE=main.c
 
@@ -8,8 +10,13 @@ SOURCE=main.c
 ARCH=amd64
 DEBNAME=$(OUT)_$(VERSION)-$(REVISION)_$(ARCH)
 
+ifeq ($(NOTIFY), YES)
+FLAGS += -DNOTIFY -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/gdk-pixbuf-2.0 -lnotify
+DEBNAME=$(OUT)-notify_$(VERSION)-$(REVISION)_$(ARCH)
+endif
+
 $(OUT): $(SOURCE)
-	gcc -o $(OUT) $(SOURCE)
+	gcc -o $(OUT) $(SOURCE) $(FLAGS)
 
 install: $(OUT)
 	cp $(OUT) /usr/local/bin/
@@ -25,6 +32,9 @@ deb: $(OUT)
 	echo "Version: $(VERSION)" >> $(DEBNAME)/DEBIAN/control
 	echo "Architecture: $(ARCH)" >> $(DEBNAME)/DEBIAN/control
 	echo "Maintainer: Mateusz Dukat <mateusz.dukat1@gmail.com>" >> $(DEBNAME)/DEBIAN/control
+ifeq ($(NOTIFY), YES)
+	echo "Depends: libnotify (>=0.7.9)" >> $(DEBNAME)/DEBIAN/control
+endif
 	echo "Description: Ultra-simple Intel Backlight control tool" >> $(DEBNAME)/DEBIAN/control
 	# Generate postinst file
 	echo "#!/bin/sh" > $(DEBNAME)/DEBIAN/postinst
@@ -34,5 +44,4 @@ deb: $(OUT)
 	dpkg-deb --build --root-owner-group $(DEBNAME)
 
 clean:
-	rm $(OUT)
-	rm -rf $(DEBNAME) $(DEBNAME).deb
+	rm -rf $(DEBNAME) $(DEBNAME).deb $(OUT)
