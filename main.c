@@ -60,6 +60,10 @@ void setBrightness(int brightness){
 }
 
 int transformToIntel(int percent){
+	if(percent <= 0)
+		percent = 1;
+	if(percent > 100)
+		percent = 100;
 	return getMaxBrightness()*(percent/100.0f);
 }
 

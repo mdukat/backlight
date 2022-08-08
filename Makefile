@@ -1,5 +1,5 @@
 VERSION=1.1
-REVISION=1
+REVISION=2
 
 NOTIFY=YES
 FLAGS=
@@ -33,7 +33,7 @@ deb: $(OUT)
 	echo "Architecture: $(ARCH)" >> $(DEBNAME)/DEBIAN/control
 	echo "Maintainer: Mateusz Dukat <mateusz.dukat1@gmail.com>" >> $(DEBNAME)/DEBIAN/control
 ifeq ($(NOTIFY), YES)
-	echo "Depends: libnotify (>=0.7.9)" >> $(DEBNAME)/DEBIAN/control
+	echo "Depends: libnotify-bin (>=0.7.9)" >> $(DEBNAME)/DEBIAN/control
 endif
 	echo "Description: Ultra-simple Intel Backlight control tool" >> $(DEBNAME)/DEBIAN/control
 	# Generate postinst file
